@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            background-color: #1e1e2e;
+            color: white;
+        }
+        h1 {
+            margin-top: 20px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 10px rgba(255, 255, 255, 0.3);
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 10px;
+            margin: 20px auto;
+            width: 330px;
+            background-color: #3a3d4a;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 15px rgba(255, 255, 255, 0.2);
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5em;
+            background-color: #ffffff;
+            color: black;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s ease-in-out;
+        }
+        .cell:hover {
+            background-color: #f0db4f;
+        }
+        .cell.taken {
+            cursor: not-allowed;
+        }
+        .winner {
+            color: #4CAF50;
+            font-size: 1.8em;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .reset-btn {
+            padding: 12px 25px;
+            font-size: 1.2em;
+            background-color: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: 0.3s ease-in-out;
+        }
+        .reset-btn:hover {
+            background-color: #e84118;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tic-Tac-Toe</h1>
+    <div class="board" id="board"></div>
+    <p class="winner" id="winner"></p>
+    <button class="reset-btn" onclick="resetGame()">Reset Game</button>
+    
+    <script>
+        const board = document.getElementById("board");
+        const winnerText = document.getElementById("winner");
+        let cells = Array(9).fill(null);
+        let currentPlayer = "X";
+        let gameOver = false;
+
+        function createBoard() {
+            board.innerHTML = "";
+            cells.forEach((cell, index) => {
+                const cellElement = document.createElement("div");
+                cellElement.classList.add("cell");
+                cellElement.dataset.index = index;
+                cellElement.addEventListener("click", () => makeMove(index));
+                board.appendChild(cellElement);
+            });
+        }
+
+        function makeMove(index) {
+            if (cells[index] || gameOver) return;
+            cells[index] = currentPlayer;
+            updateBoard();
+            if (checkWinner()) {
+                winnerText.textContent = `${currentPlayer} Wins!`;
+                gameOver = true;
+                return;
+            }
+            currentPlayer = currentPlayer === "X" ? "O" : "X";
+            if (currentPlayer === "O") aiMove();
+        }
+
+        function aiMove() {
+            let availableCells = cells.map((cell, i) => cell === null ? i : null).filter(i => i !== null);
+            if (availableCells.length === 0) return;
+            let randomIndex = availableCells[Math.floor(Math.random() * availableCells.length)];
+            cells[randomIndex] = "O";
+            updateBoard();
+            if (checkWinner()) {
+                winnerText.textContent = `O Wins!`;
+                gameOver = true;
+            }
+            currentPlayer = "X";
+        }
+
+        function updateBoard() {
+            document.querySelectorAll(".cell").forEach((cell, index) => {
+                cell.textContent = cells[index];
+                if (cells[index]) cell.classList.add("taken");
+            });
+        }
+
+        function checkWinner() {
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6]
+            ];
+            return winPatterns.some(pattern => {
+                const [a, b, c] = pattern;
+                return cells[a] && cells[a] === cells[b] && cells[a] === cells[c];
+            });
+        }
+
+        function resetGame() {
+            cells = Array(9).fill(null);
+            gameOver = false;
+            winnerText.textContent = "";
+            currentPlayer = "X";
+            createBoard();
+        }
+
+        createBoard();
+    </script>
+</body>
+</html>
